@@ -87,23 +87,6 @@ typedef enum
 }
 
 
-- (NSDictionary*)clientConfiguration {
-
-    NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
-    NSMutableDictionary *configuration = [NSMutableDictionary dictionary];
-    if (info[kInstagramAppClientIdConfigurationKey]) {
-        configuration[kInstagramAppClientIdConfigurationKey] = info[kInstagramAppClientIdConfigurationKey];
-    }
-    if (info[kInstagramAppRedirectURLConfigurationKey]) {
-        configuration[kInstagramAppRedirectURLConfigurationKey] = info[kInstagramAppRedirectURLConfigurationKey];
-    }
-    configuration[kInstagramKitBaseUrlConfigurationKey] = kInstagramKitBaseUrl;
-    configuration[kInstagramKitAuthorizationUrlConfigurationKey] = kInstagramKitAuthorizationUrl;
-    
-    return [NSDictionary dictionaryWithDictionary:configuration];
-}
-
-
 - (instancetype)init {
     if (self = [super init])
     {
@@ -111,18 +94,7 @@ typedef enum
         self.httpManager = [[AFHTTPSessionManager alloc] initWithBaseURL:baseURL];
         self.httpManager.responseSerializer = [[AFJSONResponseSerializer alloc] init];
 
-        NSDictionary *configuration = [self clientConfiguration];
-        self.appClientID = configuration[kInstagramAppClientIdConfigurationKey];
-        self.appRedirectURL = configuration[kInstagramAppRedirectURLConfigurationKey];
-        self.authorizationURL = kInstagramKitAuthorizationUrl;
-
         mBackgroundQueue = dispatch_queue_create("background", NULL);
-
-        NSAssert(IKNotNull(self.appClientID) && ![self.appClientID isEqualToString:@""] && ![self.appClientID isEqualToString:@"<Client Id here>"], @"Invalid Instagram Client ID. Please set a valid value for the key \"InstagramAppClientId\" in Info.plist");
-        
-        NSAssert(IKNotNull(self.appRedirectURL) && ![self.appRedirectURL isEqualToString:@""] && ![self.appRedirectURL isEqualToString:@"<Redirect URL here>"], @"Invalid Redirect URL. Please set a valid value for the key \"InstagramAppRedirectURL\" in Info.plist", self.appRedirectURL);
-        
-        NSAssert([NSURL URLWithString:self.authorizationURL], @"Authorization URL invalid: %@", self.authorizationURL);
     }
     return self;
 }
@@ -149,11 +121,10 @@ typedef enum
 
 - (NSDictionary *)authorizationParametersWithScope:(IKLoginScope)scope
 {
-    NSDictionary *configuration = [self clientConfiguration];
     NSString *scopeString = [self stringForScope:scope];
     NSDictionary *parameters = @{
-                                 @"client_id": configuration[kInstagramAppClientIdConfigurationKey],
-                                 @"redirect_uri": configuration[kInstagramAppRedirectURLConfigurationKey],
+                                 @"client_id": self.appClientID,
+                                 @"redirect_uri": self.appRedirectURL,
                                  @"response_type": @"token",
                                  @"scope": scopeString
                                  };
