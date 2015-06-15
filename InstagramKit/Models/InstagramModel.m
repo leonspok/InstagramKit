@@ -100,6 +100,22 @@ NSString *const kLocationName = @"name";
     return self;
 }
 
+- (BOOL)isEqual:(id)other {
+    if (!other) {
+        return NO;
+    }
+    
+    if (other == self) {
+        return YES;
+    }
+    
+    if ([other isKindOfClass:self.class]) {
+        InstagramModel *otherModel = (InstagramModel *)other;
+        return [otherModel isEqualToModel:self];
+    }
+    return NO;
+}
+
 - (BOOL)isEqualToModel:(InstagramModel *)model {
     
     if (model && [model respondsToSelector:@selector(Id)]) {
